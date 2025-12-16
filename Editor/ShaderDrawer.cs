@@ -2537,7 +2537,8 @@ namespace LWGUI
 		{
 			foreach (var showIfData in propStaticData.showIfDatas)
 			{
-				var targetValue = perMaterialData.propDynamicDatas[showIfData.targetPropertyName].property.floatValue;
+				MaterialProperty property = perMaterialData.propDynamicDatas[showIfData.targetPropertyName].property;
+                var targetValue = property.propertyType is ShaderPropertyType.Int ? property.intValue : property.floatValue;
 				Compare(showIfData, targetValue, ref propDynamicData.isShowing);
 			}
 		}
