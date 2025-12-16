@@ -587,13 +587,13 @@ namespace LWGUI
 			this._values = values;
 		}
 
-		protected override bool IsMatchPropType(MaterialProperty property) { return property.GetPropertyType() is ShaderPropertyType.Float; }
+		protected override bool IsMatchPropType(MaterialProperty property) { return property.GetPropertyType() is ShaderPropertyType.Int || property.GetPropertyType() is ShaderPropertyType.Float; }
 
 		protected virtual string GetKeywordName(string propName, string name) { return (name).Replace(' ', '_').ToUpperInvariant(); }
 
 		public override void GetDefaultValueDescription(Shader inShader, MaterialProperty inProp, MaterialProperty inDefaultProp, PerShaderData inPerShaderData, PerMaterialData inoutPerMaterialData)
 		{
-			var index = Array.IndexOf(_values, (int)inDefaultProp.floatValue);
+			var index = Array.IndexOf(_values, inDefaultProp.intValue);
 			if (index < _names.Length && index >= 0)
 				inoutPerMaterialData.propDynamicDatas[inProp.name].defaultValueDescription = _names[index].text;
 		}
@@ -614,10 +614,10 @@ namespace LWGUI
 			var rect = position;
 
 			string[] keyWords = GetKeywords(prop);
-			int index = Array.IndexOf(_values, prop.floatValue);
+			int index = Array.IndexOf(_values, prop.intValue);
 			if (index < 0)
 			{
-				Debug.LogError("LWGUI: Property: " + prop.name + " has unknown Enum Value: '" + prop.floatValue + "' !\n");
+				Debug.LogError("LWGUI: Property: " + prop.name + " has unknown Enum Value: '" + prop.intValue + "' !\n");
 				return;
 			}
 
@@ -626,7 +626,7 @@ namespace LWGUI
 			EditorGUI.showMixedValue = false;
 			if (Helper.EndChangeCheck(metaDatas, prop))
 			{
-				prop.floatValue = _values[newIndex];
+				prop.intValue = (int)_values[newIndex];
 				Helper.SelectShaderKeyword(editor.targets, keyWords, newIndex);
 			}
 		}
@@ -636,7 +636,7 @@ namespace LWGUI
 			base.Apply(prop);
 			if (!prop.hasMixedValue && VersionControlHelper.IsWriteable(prop.targets))
 			{
-				Helper.SelectShaderKeyword(prop.targets, GetKeywords(prop), (int)prop.floatValue);
+				Helper.SelectShaderKeyword(prop.targets, GetKeywords(prop), prop.intValue);
 			}
 		}
 	}
