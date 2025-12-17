@@ -591,9 +591,23 @@ namespace LWGUI
 
 		protected virtual string GetKeywordName(string propName, string name) { return (name).Replace(' ', '_').ToUpperInvariant(); }
 
+        protected int GetPropertyValueAsInteger(MaterialProperty prop)
+        {
+            int value = prop.propertyType is ShaderPropertyType.Int ? prop.intValue : (int)prop.floatValue;
+            return value;
+        }
+		
+        protected void SetPropertyValueWithInteger(MaterialProperty prop, int value)
+        {
+            if(prop.propertyType is ShaderPropertyType.Int)
+				prop.intValue = value;
+			else
+				prop.floatValue = value;
+        }
+        
 		public override void GetDefaultValueDescription(Shader inShader, MaterialProperty inProp, MaterialProperty inDefaultProp, PerShaderData inPerShaderData, PerMaterialData inoutPerMaterialData)
-		{
-			var index = Array.IndexOf(_values, inDefaultProp.intValue);
+        {
+            var index = Array.IndexOf(_values, GetPropertyValueAsInteger(inDefaultProp));
 			if (index < _names.Length && index >= 0)
 				inoutPerMaterialData.propDynamicDatas[inProp.name].defaultValueDescription = _names[index].text;
 		}
@@ -614,10 +628,11 @@ namespace LWGUI
 			var rect = position;
 
 			string[] keyWords = GetKeywords(prop);
-			int index = Array.IndexOf(_values, prop.intValue);
+            int value = GetPropertyValueAsInteger(prop);
+            int index = Array.IndexOf(_values, value);
 			if (index < 0)
 			{
-				Debug.LogError("LWGUI: Property: " + prop.name + " has unknown Enum Value: '" + prop.intValue + "' !\n");
+				Debug.LogError("LWGUI: Property: " + prop.name + " has unknown Enum Value: '" + value + "' !\n");
 				return;
 			}
 
@@ -626,7 +641,7 @@ namespace LWGUI
 			EditorGUI.showMixedValue = false;
 			if (Helper.EndChangeCheck(metaDatas, prop))
 			{
-				prop.intValue = (int)_values[newIndex];
+				SetPropertyValueWithInteger(prop, (int)_values[newIndex]);
 				Helper.SelectShaderKeyword(editor.targets, keyWords, newIndex);
 			}
 		}
@@ -634,9 +649,10 @@ namespace LWGUI
 		public override void Apply(MaterialProperty prop)
 		{
 			base.Apply(prop);
+            int value = GetPropertyValueAsInteger(prop);
 			if (!prop.hasMixedValue && VersionControlHelper.IsWriteable(prop.targets))
 			{
-				Helper.SelectShaderKeyword(prop.targets, GetKeywords(prop), prop.intValue);
+				Helper.SelectShaderKeyword(prop.targets, GetKeywords(prop), value);
 			}
 		}
 	}
